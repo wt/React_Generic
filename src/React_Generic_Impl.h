@@ -276,7 +276,11 @@ StreamReaction* React_Generic::onAvailable(Stream& stream, const react_callback 
   return sre;
 }
 
+#if defined(ESP32) || defined(ESP8266)
 ISRReaction* React_Generic::onInterrupt(const uint8_t pin_number, int mode, const react_callback cb)
+#else
+ISRReaction* React_Generic::onInterrupt(const pin_size_t pin_number, PinStatus mode, const react_callback cb)
+#endif
 {
   ISRReaction* isrre = new ISRReaction(pin_number, mode, cb);
   isrre->add(this);

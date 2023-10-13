@@ -40,7 +40,11 @@
 
 namespace react_generic 
 {
+  #if defined(ESP32) || defined(ESP8266)
   typedef std::function<void()> react_callback;
+  #else
+  typedef void (*react_callback)(void);
+  #endif
   typedef void (*isr_react_callback)(void*);
   
   // forward declarations
@@ -254,8 +258,13 @@ namespace react_generic
   class ISRReaction : public Reaction 
   {
     private:
+  #if defined(ESP32) || defined(ESP8266)
       const uint8_t pin_number;
       const int mode;
+  #else
+      const pin_size_t pin_number;
+      const PinStatus mode;
+  #endif
   #ifdef ESP32
       // set to true once gpio_install_isr_service is called
       static bool isr_service_installed;
@@ -271,7 +280,11 @@ namespace react_generic
          @param callback Interrupt callback. Keep this function short and add the
          ICACHE_RAM_ATTR attribute.
       */
+  #if defined(ESP32) || defined(ESP8266)
       ISRReaction(uint8_t pin_number, int mode, const react_callback callback)
+  #else
+      ISRReaction(pin_size_t pin_number, PinStatus mode, const react_callback callback)
+  #endif
         : Reaction(callback), pin_number(pin_number), mode(mode) 
       {
   #ifdef ESP32
@@ -391,8 +404,13 @@ namespace react_generic
          should be defined with ICACHE_RAM_ATTR.
          @return ISRReaction
       */
+  #if defined(ESP32) || defined(ESP8266)
       ISRReaction* onInterrupt(const uint8_t pin_number, int mode,
                                const react_callback cb);
+  #else
+      ISRReaction* onInterrupt(const pin_size_t pin_number, PinStatus mode,
+                               const react_callback cb);
+  #endif
       /**
          @brief Create a new TickReaction
   
